@@ -9,15 +9,21 @@ class AdminRequestCard extends StatelessWidget {
   const AdminRequestCard({
     super.key,
     required this.admin,
-    required this.onApprove,
-    required this.onReject,
+    this.onApprove,
+    this.onReject,
+    this.onRemove,
   });
 
   final UserModel admin;
 
-  final void Function() onApprove;
+  /// Called when the super admin approves a *pending* admin.
+  final VoidCallback? onApprove;
 
-  final void Function() onReject;
+  /// Called when the super admin rejects a *pending* admin.
+  final VoidCallback? onReject;
+
+  /// Called when the super admin removes an *approved / rejected* admin.
+  final VoidCallback? onRemove;
 
   String _getStatusText() {
     if (admin.status == AdminStatus.approved) {
@@ -55,6 +61,8 @@ class AdminRequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPending = admin.status == AdminStatus.pending;
+    final isApproved = admin.status == AdminStatus.approved;
+    final isRejected = admin.status == AdminStatus.rejected;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -178,6 +186,23 @@ class AdminRequestCard extends StatelessWidget {
                     ),
                   ),
               ],
+            ),
+          ] else if (!isPending && onRemove != null && (isApproved || isRejected)) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onRemove,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text('Remove'),
+              ),
             ),
           ],
         ],

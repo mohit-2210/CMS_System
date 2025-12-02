@@ -174,8 +174,8 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
                 ...authService.approvedAdmins.map(
                   (admin) => AdminRequestCard(
                     admin: admin,
-                    onApprove: () {},
-                    onReject: () {},
+                    onRemove: () =>
+                        _handleRemove(admin.phone, admin.name, authService),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -192,8 +192,8 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
                 ...authService.rejectedAdmins.map(
                   (admin) => AdminRequestCard(
                     admin: admin,
-                    onApprove: () {},
-                    onReject: () {},
+                    onRemove: () =>
+                        _handleRemove(admin.phone, admin.name, authService),
                   ),
                 ),
               ],

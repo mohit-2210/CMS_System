@@ -224,45 +224,46 @@ class AdminSidebar extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        onRemove(
-                                          admin.phone,
-                                          admin.name,
-                                          authService,
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.red,
-                                        foregroundColor: Colors.white,
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 10,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
+                                if (admin.status != AdminStatus.pending)
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          onRemove(
+                                            admin.phone,
+                                            admin.name,
+                                            authService,
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 10,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      child: const Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: const [
-                                          Icon(Icons.delete, size: 16),
-                                          SizedBox(width: 6),
-                                          Text(
-                                            'Remove',
-                                            style: TextStyle(fontSize: 13),
-                                          ),
-                                        ],
+                                        child: const Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.delete, size: 16),
+                                            SizedBox(width: 6),
+                                            Text(
+                                              'Remove',
+                                              style: TextStyle(fontSize: 13),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                           );
