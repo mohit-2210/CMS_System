@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:cms/globals/auth_service.dart';
-import 'package:cms/pages/super_admin_dashboard.dart';
 import 'package:cms/pages/admin_dashboard.dart';
 import 'package:cms/pages/admin_registration_screen.dart';
-import 'package:cms/user_role.dart';
 
 @NowaGenerated()
 class LoginScreen extends StatefulWidget {
@@ -69,15 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
     });
     final action = result['action'];
     
-    // Navigate based on user role
-    if (action == 'super_admin_dashboard') {
-      // Super Admin goes to SuperAdminDashboard with drawer
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const SuperAdminDashboard()),
-      );
-    } else if (action == 'admin_dashboard') {
-      // Regular Admin goes to AdminDashboard without drawer
+    // Both Super Admin and Regular Admin go to the SAME AdminDashboard
+    // The difference is that Super Admin will see the drawer icon
+    if (action == 'super_admin_dashboard' || action == 'admin_dashboard') {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const AdminDashboard()),
