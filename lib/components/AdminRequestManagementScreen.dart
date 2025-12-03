@@ -16,7 +16,7 @@ class AdminRequestManagementScreen extends StatelessWidget {
     AuthService authService,
   ) async {
     try {
-      await authService.approveAdmin(phone);
+      authService.approveAdmin(phone);
       if (context.mounted) {
         _showSnackBar(
           context,
@@ -41,7 +41,7 @@ class AdminRequestManagementScreen extends StatelessWidget {
     AuthService authService,
   ) async {
     try {
-      await authService.rejectAdmin(phone);
+      authService.rejectAdmin(phone);
       if (context.mounted) {
         _showSnackBar(
           context,
