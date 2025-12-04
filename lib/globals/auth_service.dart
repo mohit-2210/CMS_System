@@ -4,7 +4,6 @@ import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:cms/user_role.dart';
 import 'package:cms/admin_status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
 @NowaGenerated()
@@ -17,7 +16,6 @@ class AuthService extends ChangeNotifier {
     return Provider.of<AuthService>(context, listen: false);
   }
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   UserModel? _currentUser;
@@ -47,17 +45,7 @@ class AuthService extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    // Listen to auth state changes
-    _auth.authStateChanges().listen((User? user) async {
-      if (user != null) {
-        await _loadCurrentUser(user.phoneNumber ?? '');
-      } else {
-        _currentUser = null;
-        notifyListeners();
-      }
-    });
-
-    // Listen to all users changes (for Super Admin)
+    // Listen to all users changes
     _firestore.collection('users').snapshots().listen((snapshot) {
       _allUsers = snapshot.docs
           .map((doc) => UserModel.fromJson({...doc.data(), 'phone': doc.id}))
@@ -81,7 +69,7 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<UserModel?> _getUserFromFirestore(String phone) async {
+  Future<UserModel?> getUser(String phone) async {
     try {
       final doc = await _firestore.collection('users').doc(phone).get();
       if (doc.exists) {
@@ -99,8 +87,7 @@ class AuthService extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Check if user exists in Firestore
-      final user = await _getUserFromFirestore(phone);
+      final user = await getUser(phone);
 
       if (user == null) {
         _isLoading = false;
@@ -112,32 +99,17 @@ class AuthService extends ChangeNotifier {
         };
       }
 
-      // Sign in anonymously with Firebase Auth (since we're not using OTP)
-      // We'll use the phone as identifier
-      await _auth.signInAnonymously();
-      
-      // Set current user
       _currentUser = user;
       notifyListeners();
-
       _isLoading = false;
       notifyListeners();
 
-      // Route based on role and status
       if (user.role == UserRole.superAdmin) {
-        return {
-          'success': true,
-          'action': 'super_admin_dashboard',
-          'user': user,
-        };
+        return {'success': true, 'action': 'super_admin_dashboard', 'user': user};
       }
 
       if (user.status == AdminStatus.approved) {
-        return {
-          'success': true,
-          'action': 'admin_dashboard',
-          'user': user,
-        };
+        return {'success': true, 'action': 'admin_dashboard', 'user': user};
       }
 
       if (user.status == AdminStatus.rejected) {
@@ -145,25 +117,20 @@ class AuthService extends ChangeNotifier {
           'success': false,
           'action': 'rejected',
           'message': 'Your access request has been rejected by Super Admin.',
-          'user': user,
+          'user': user
         };
       }
 
-      // Pending status
       return {
         'success': false,
         'action': 'pending',
-        'message': 'Your request is pending approval from Super Admin.',
+        'message': 'Your request is pending approval from Super Admin.'
       };
     } catch (e) {
       _isLoading = false;
       notifyListeners();
       debugPrint('Login error: $e');
-      return {
-        'success': false,
-        'action': 'error',
-        'message': 'Login failed: $e',
-      };
+      return {'success': false, 'action': 'error', 'message': 'Login failed: $e'};
     }
   }
 
@@ -172,15 +139,13 @@ class AuthService extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // Check if user already exists
-      final existingUser = await _getUserFromFirestore(phone);
+      final existingUser = await getUser(phone);
       if (existingUser != null) {
         _isLoading = false;
         notifyListeners();
         return false;
       }
 
-      // Create new admin in Firestore
       final newAdmin = UserModel(
         phone: phone,
         name: name,
@@ -235,9 +200,9 @@ class AuthService extends ChangeNotifier {
     try {
       await _firestore.collection('users').doc(phone).delete();
       
-      // If removing current user, logout
       if (_currentUser?.phone == phone) {
-        await logout();
+        _currentUser = null;
+        notifyListeners();
       }
       
       notifyListeners();
@@ -248,12 +213,7 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    try {
-      await _auth.signOut();
-      _currentUser = null;
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Logout error: $e');
-    }
+    _currentUser = null;
+    notifyListeners();
   }
 }

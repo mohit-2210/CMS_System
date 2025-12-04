@@ -13,11 +13,11 @@ late final SharedPreferences sharedPrefs;
 
 @NowaGenerated()
 main() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
- 
-  WidgetsFlutterBinding.ensureInitialized();
   sharedPrefs = await SharedPreferences.getInstance();
 
   runApp(const MyApp());
@@ -37,7 +37,9 @@ class MyApp extends StatelessWidget {
         builder: (context, child) => MaterialApp(
           theme: AppState.of(context).theme,
           initialRoute: 'HomePage',
-          routes: {'HomePage': (context) => const LoginScreen()},
+          routes: {
+            'HomePage': (context) => const LoginScreen(),
+            },
         ),
       ),
     );
