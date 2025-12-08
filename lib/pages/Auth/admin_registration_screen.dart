@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:cms/globals/auth_service.dart';
-import 'package:cms/pages/login_screen.dart';
+import 'package:cms/pages/Auth/login_screen.dart';
 
 @NowaGenerated()
 class AdminRegistrationScreen extends StatefulWidget {

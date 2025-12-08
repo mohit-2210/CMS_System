@@ -1,4 +1,5 @@
-import 'package:cms/pages/login_screen.dart';
+import 'package:cms/pages/Auth/login_screen.dart';
+import 'package:cms/pages/Dashboard/admin_dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:cms/globals/auth_service.dart';
 import 'package:cms/globals/app_state.dart';
 import 'firebase_options.dart';
+import 'package:cms/pages/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 @NowaGenerated()
@@ -13,7 +15,7 @@ late final SharedPreferences sharedPrefs;
 
 @NowaGenerated()
 main() async {
-    WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -36,12 +38,14 @@ class MyApp extends StatelessWidget {
         create: (context) => AppState(),
         builder: (context, child) => MaterialApp(
           theme: AppState.of(context).theme,
-          initialRoute: 'HomePage',
+          home: const SplashScreen(),
           routes: {
             'HomePage': (context) => const LoginScreen(),
-            },
+            'AdminDashboard': (context) => const AdminDashboard(),
+          },
         ),
       ),
     );
   }
 }
+

@@ -5,6 +5,7 @@ import 'package:cms/user_role.dart';
 import 'package:cms/admin_status.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @NowaGenerated()
 class AuthService extends ChangeNotifier {
@@ -53,8 +54,45 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
     });
 
+    // Check for saved login in SharedPreferences
+    await _checkSavedLogin();
+
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// Check if there's a saved login session
+  Future<void> _checkSavedLogin() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedPhone = prefs.getString('logged_in_phone');
+      
+      if (savedPhone != null && savedPhone.isNotEmpty) {
+        await _loadCurrentUser(savedPhone);
+      }
+    } catch (e) {
+      debugPrint('Error checking saved login: $e');
+    }
+  }
+
+  /// Save login session to SharedPreferences
+  Future<void> _saveLoginSession(String phone) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('logged_in_phone', phone);
+    } catch (e) {
+      debugPrint('Error saving login session: $e');
+    }
+  }
+
+  /// Clear login session from SharedPreferences
+  Future<void> _clearLoginSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('logged_in_phone');
+    } catch (e) {
+      debugPrint('Error clearing login session: $e');
+    }
   }
 
   Future<void> _loadCurrentUser(String phone) async {
@@ -63,6 +101,9 @@ class AuthService extends ChangeNotifier {
       if (doc.exists) {
         _currentUser = UserModel.fromJson({...doc.data()!, 'phone': phone});
         notifyListeners();
+      } else {
+        // User was deleted, clear session
+        await _clearLoginSession();
       }
     } catch (e) {
       debugPrint('Error loading current user: $e');
@@ -100,6 +141,10 @@ class AuthService extends ChangeNotifier {
       }
 
       _currentUser = user;
+      
+      // Save login session to SharedPreferences
+      await _saveLoginSession(phone);
+      
       notifyListeners();
       _isLoading = false;
       notifyListeners();
@@ -202,6 +247,7 @@ class AuthService extends ChangeNotifier {
       
       if (_currentUser?.phone == phone) {
         _currentUser = null;
+        await _clearLoginSession();
         notifyListeners();
       }
       
@@ -214,6 +260,7 @@ class AuthService extends ChangeNotifier {
 
   Future<void> logout() async {
     _currentUser = null;
+    await _clearLoginSession();
     notifyListeners();
   }
 }
