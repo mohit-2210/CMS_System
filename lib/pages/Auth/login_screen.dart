@@ -81,20 +81,20 @@ class _LoginScreenState extends State<LoginScreen> {
         builder: (context) => AlertDialog(
           title: const Text('Access Rejected'),
           content: Text(result['message']),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AdminDashboard(),
-                  ),
-                );
-              },
-              child: const Text('Open Dashboard'),
-            ),
-          ],
+          // actions: [
+          //   TextButton(
+          //     onPressed: () {
+          //       Navigator.pop(context);
+          //       Navigator.pushReplacement(
+          //         context,
+          //         MaterialPageRoute(
+          //           builder: (context) => const AdminDashboard(),
+          //         ),
+          //       );
+          //     },
+          //     child: const Text('Open Dashboard'),
+          //   ),
+          // ],
         ),
       );
     } else if (action == 'pending') {
