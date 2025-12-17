@@ -1,4 +1,3 @@
-// lib/screens/daily_attendance_screen.dart
 import 'package:cms/pages/Dashboard/Attendance/service/attendance_service.dart';
 import 'package:cms/pages/Dashboard/Attendance/widgets/calendar_strip.dart';
 import 'package:cms/pages/Dashboard/Attendance/widgets/labor_card.dart';
@@ -116,6 +115,7 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('Site: $siteName'),
             Text('Labour: $laborName',
                 style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
@@ -127,7 +127,7 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
               const SizedBox(height: 8),
               Text('Withdraw: ₹$withdrawAmount'),
               Text('Payment Mode: $paymentMode'),
-              Text('Admin: $adminName ?? N/A'),
+              Text('Admin: $adminName'),
             ],
           ],
         ),
@@ -148,8 +148,8 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
       ),
     );
 
-    if (confirmed == true && _selectedSite != null) {
-      try {
+      if (confirmed == true) {
+        try {
         await _attendanceService.saveAttendance(
           siteName: siteName,
           laborId: laborId,
