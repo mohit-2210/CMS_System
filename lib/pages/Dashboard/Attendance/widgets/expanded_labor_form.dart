@@ -125,7 +125,7 @@ class ExpandedLaborForm extends StatelessWidget {
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                       ),
-                      items: ['Full Day', 'Half Day', 'Semi-Half Day', 'Half Day + Half Day']
+                      items: ['Full Day', 'Half Day', 'Semi-Half Day']
                           .map((shift) => DropdownMenuItem(value: shift, child: Text(shift, style: const TextStyle(fontSize: 13))))
                           .toList(),
                       onChanged: onDayShiftChanged,
@@ -154,7 +154,7 @@ class ExpandedLaborForm extends StatelessWidget {
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                       ),
-                      items: ['None', 'Full Night', 'Half Night', 'Half Night + Half Night']
+                      items: ['None', 'Full Night', 'Half Night']
                           .map((shift) => DropdownMenuItem(value: shift, child: Text(shift, style: const TextStyle(fontSize: 13))))
                           .toList(),
                       onChanged: onNightShiftChanged,

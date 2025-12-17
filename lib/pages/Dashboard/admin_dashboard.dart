@@ -1,3 +1,4 @@
+import 'package:cms/pages/Dashboard/Attendance/daily_attendance_screen.dart';
 import 'package:cms/pages/Dashboard/Sites/site_records_screen.dart';
 import 'package:cms/pages/Dashboard/Labours/labor_records_screen.dart';
 import 'package:flutter/material.dart';
@@ -514,6 +515,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         title: 'Daily Attendance',
                         subtitle: 'Track and log attendance',
                         onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DailyAttendanceScreen(),
+                            ),
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content:
