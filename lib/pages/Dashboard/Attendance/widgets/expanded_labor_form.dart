@@ -41,7 +41,7 @@ class _ExpandedLaborFormState extends State<ExpandedLaborForm> {
   @override
   void initState() {
     super.initState();
-    _adminsFuture = _attendanceService.getApprovedAdmins();
+    _adminsFuture = _attendanceService.getApprovedAdminsAndSuperAdmins();
   }
 
   @override
@@ -229,10 +229,10 @@ class _ExpandedLaborFormState extends State<ExpandedLaborForm> {
               }
 
               return DropdownButtonFormField<String>(
-                value: widget.selectedAdminName != null &&
-                        admins.contains(widget.selectedAdminName)
-                    ? widget.selectedAdminName
-                    : null,
+                // initialValue: widget.selectedAdminName != null &&
+                //         admins.contains(widget.selectedAdminName)
+                //     ? widget.selectedAdminName
+                //     : null,
                 hint: const Text('Select an admin'),
                 decoration: InputDecoration(
                   filled: true,

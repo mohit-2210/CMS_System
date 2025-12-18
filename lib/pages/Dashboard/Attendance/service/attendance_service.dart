@@ -33,13 +33,23 @@ class AttendanceService {
   }
 
   /// Fetch all approved admin users
-  Future<List<String>> getApprovedAdmins() async {
+  Future<List<String>> getApprovedAdminsAndSuperAdmins() async {
     try {
       final query = await _firestore
-          .collection('users')
-          .where('role', isEqualTo: UserRole.admin.toString())
-          .where('status', isEqualTo: AdminStatus.approved.toString())
-          .get();
+    .collection('users')
+    .where(
+      'role',
+      whereIn: [
+        UserRole.admin.toString(),
+        UserRole.superAdmin.toString(),
+      ],
+    )
+    .where(
+      'status',
+      isEqualTo: AdminStatus.approved.toString(),
+    )
+    .get();
+
 
       return query.docs
           .map((doc) => doc['name'] as String)

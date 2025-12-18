@@ -521,11 +521,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               builder: (context) => const DailyAttendanceScreen(),
                             ),
                           );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text('Attendance feature coming soon')),
-                          );
                         },
                       ),
                       _buildDashboardCard(
