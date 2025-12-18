@@ -1,4 +1,3 @@
-// lib/widgets/calendar_strip.dart
 import 'package:flutter/material.dart';
 import 'date_card.dart';
 

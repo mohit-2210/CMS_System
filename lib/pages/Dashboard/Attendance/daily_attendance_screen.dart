@@ -18,7 +18,7 @@ class DailyAttendanceScreen extends StatefulWidget {
 
 @NowaGenerated()
 class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
-  String? _selectedSite;
+  String? _selectedSite; // Default to null (All Sites)
   DateTime _selectedDate = DateTime.now();
   final ScrollController _calendarScrollController = ScrollController();
   final AttendanceService _attendanceService = AttendanceService();
@@ -100,12 +100,15 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
     required String paymentMode,
     required String? adminName,
   }) async {
-    if (withdrawAmount != null && adminName == null) {
-      _showErrorSnackBar('Please enter Admin Name for payment entry');
-      return;
+    // Validation
+    if (adminName == null || adminName.isEmpty) {
+      if (withdrawAmount != null && withdrawAmount.isNotEmpty) {
+        _showErrorSnackBar('Please select an admin for payment entry');
+        return;
+      }
     }
 
-    // Show confirmation dialog (reusable, but inline for simplicity)
+    // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -125,7 +128,7 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
             Text('Night Shift: $nightShift'),
             if (withdrawAmount != null && withdrawAmount.isNotEmpty) ...[
               const SizedBox(height: 8),
-              Text('Withdraw: ₹$withdrawAmount'),
+              Text('New Withdrawal: ₹$withdrawAmount'),
               Text('Payment Mode: $paymentMode'),
               Text('Admin: $adminName'),
             ],
@@ -148,22 +151,30 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
       ),
     );
 
-      if (confirmed == true) {
-        try {
-        await _attendanceService.saveAttendance(
+    if (confirmed == true) {
+      try {
+        final newWithdrawAmount =
+            withdrawAmount != null && withdrawAmount.isNotEmpty
+                ? int.tryParse(withdrawAmount)
+                : null;
+
+        await _attendanceService.createOrUpdateAttendance(
           siteName: siteName,
           laborId: laborId,
           laborName: laborName,
           date: _selectedDate,
           dayShift: dayShift,
           nightShift: nightShift,
-          withdrawAmount: withdrawAmount != null && withdrawAmount.isNotEmpty
-              ? int.tryParse(withdrawAmount)
-              : null,
+          newWithdrawAmount: newWithdrawAmount,
           paymentMode: paymentMode,
           adminName: adminName,
         );
-        _showSuccessSnackBar('Attendance saved successfully');
+
+        _showSuccessSnackBar(
+          newWithdrawAmount != null && newWithdrawAmount > 0
+              ? 'Attendance and payment recorded'
+              : 'Attendance recorded successfully',
+        );
       } catch (e) {
         _showErrorSnackBar('Failed to save attendance: $e');
       }
@@ -253,11 +264,13 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
           Expanded(
             child: Consumer<LaborService>(
               builder: (context, laborService, child) {
-                final labors = _selectedSite != null
+                // Filter labors based on selected site
+                final labors = _selectedSite != null && _selectedSite != 'All Sites'
                     ? laborService.labors
                         .where((labor) => labor.siteName == _selectedSite)
                         .toList()
-                    : laborService.labors;
+                    : laborService.labors; // All Sites: show all labors
+
                 if (labors.isEmpty) {
                   return Center(
                     child: Column(
@@ -270,16 +283,19 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          _selectedSite != null
+                          _selectedSite != null && _selectedSite != 'All Sites'
                               ? 'No labors found for this site'
-                              : 'Please select a site',
+                              : 'No labors available',
                           style: const TextStyle(
-                              fontSize: 16, color: Color(0xff607286)),
+                            fontSize: 16,
+                            color: Color(0xff607286),
+                          ),
                         ),
                       ],
                     ),
                   );
                 }
+
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
                   itemCount: labors.length,
@@ -289,6 +305,7 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
                       laborId: labor.id,
                       laborName: labor.laborName,
                       siteName: labor.siteName,
+                      selectedDate: _selectedDate,
                       onSave: (data) => _saveAttendance(
                         laborId: data['laborId'],
                         laborName: data['laborName'],
