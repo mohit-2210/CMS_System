@@ -9,6 +9,7 @@ class LaborModel {
     required this.siteName,
     required this.salary,
     required this.createdAt,
+    this.isActive = true,
   });
 
   factory LaborModel.fromJson(Map<String, dynamic> json) {
@@ -19,6 +20,7 @@ class LaborModel {
       siteName: json['siteName'] as String,
       salary: (json['salary'] as num).toDouble(),
       createdAt: DateTime.parse(json['createdAt'] as String),
+      isActive: json['isActive'] as bool? ?? true,
     );
   }
 
@@ -28,6 +30,7 @@ class LaborModel {
   final String siteName;
   final double salary;
   final DateTime createdAt;
+  final bool isActive;
 
   Map<String, dynamic> toJson() {
     return {
@@ -37,6 +40,7 @@ class LaborModel {
       'siteName': siteName,
       'salary': salary,
       'createdAt': createdAt.toIso8601String(),
+      'isActive': isActive,
     };
   }
 
@@ -47,6 +51,7 @@ class LaborModel {
     String? siteName,
     double? salary,
     DateTime? createdAt,
+    bool? isActive,
   }) {
     return LaborModel(
       id: id ?? this.id,
@@ -55,6 +60,7 @@ class LaborModel {
       siteName: siteName ?? this.siteName,
       salary: salary ?? this.salary,
       createdAt: createdAt ?? this.createdAt,
+      isActive: isActive ?? this.isActive,
     );
   }
 }

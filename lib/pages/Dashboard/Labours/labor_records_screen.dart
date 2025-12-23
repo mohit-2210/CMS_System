@@ -1,5 +1,5 @@
 import 'package:cms/pages/Dashboard/Labours/add_labor_screen.dart';
-import 'package:cms/pages/Dashboard/Labours/assign_labor_to_site_screen.dart';
+import 'package:cms/pages/Dashboard/Labours/widgets/assign_labor_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cms/globals/labor_service.dart';
@@ -158,6 +158,26 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
           );
         }
       }
+    }
+  }
+
+  Future<void> _showAssignmentDialog({
+    required List<String> laborIds,
+    required List<dynamic> labors,
+    bool isEdit = false,
+  }) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AssignLaborDialog(
+        selectedLaborIds: laborIds,
+        labors: labors,
+        isEdit: isEdit,
+      ),
+    );
+
+    // Clear selection after dialog closes if assignment was successful
+    if (result == true && !isEdit) {
+      _clearSelection();
     }
   }
 
@@ -336,9 +356,18 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
                               _isLaborAssigned(labor.siteName);
 
                           return GestureDetector(
-                            onTap: isAssigned
-                                ? null
-                                : () => _toggleSelection(labor.id),
+                            onTap: () {
+                              if (isAssigned) {
+                                // Open edit dialog for assigned labor
+                                _showAssignmentDialog(
+                                  laborIds: [labor.id],
+                                  labors: [labor],
+                                  isEdit: true,
+                                );
+                              } else {
+                                _toggleSelection(labor.id);
+                              }
+                            },
                             onLongPress: isAssigned
                                 ? null
                                 : () => _enterSelectionMode(labor.id),
@@ -409,12 +438,12 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
                                       height: 24,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: const Color(0xffc4c4c4),
+                                        color: const Color(0xff4caf50),
                                       ),
                                       child: const Icon(
-                                        Icons.check,
+                                        Icons.edit,
                                         color: Colors.white,
-                                        size: 16,
+                                        size: 14,
                                       ),
                                     ),
                                     const SizedBox(width: 12),
@@ -503,22 +532,14 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
                         onPressed: _selectedLaborIds.isEmpty
                             ? null
                             : () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        AssignLaborToSiteScreen(
-                                      selectedLaborIds:
-                                          _selectedLaborIds.toList(),
-                                      labors: labors
-                                          .where((l) => _selectedLaborIds
-                                              .contains(l.id))
-                                          .toList(),
-                                    ),
-                                  ),
-                                ).then((_) {
-                                  _clearSelection();
-                                });
+                                _showAssignmentDialog(
+                                  laborIds: _selectedLaborIds.toList(),
+                                  labors: labors
+                                      .where((l) => _selectedLaborIds
+                                          .contains(l.id))
+                                      .toList(),
+                                  isEdit: false,
+                                );
                               },
                         icon: const Icon(Icons.assignment),
                         label: const Text('Assign to Site'),
