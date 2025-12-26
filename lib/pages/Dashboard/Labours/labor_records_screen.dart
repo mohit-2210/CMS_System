@@ -1,3 +1,4 @@
+import 'package:cms/models/labor_model.dart';
 import 'package:cms/pages/Dashboard/Labours/add_labor_screen.dart';
 import 'package:cms/pages/Dashboard/Labours/widgets/assign_labor_dialog.dart';
 import 'package:flutter/material.dart';
@@ -163,7 +164,7 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
 
   Future<void> _showAssignmentDialog({
     required List<String> laborIds,
-    required List<dynamic> labors,
+    required List<LaborModel> labors,
     bool isEdit = false,
   }) async {
     final result = await showDialog<bool>(
