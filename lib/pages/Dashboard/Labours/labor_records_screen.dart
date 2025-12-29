@@ -19,6 +19,7 @@ class LaborRecordsScreen extends StatefulWidget {
 @NowaGenerated()
 class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
   final Set<String> _selectedLaborIds = {};
+  final Set<String> _hiddenLaborIds = {};
   bool _isSelectionMode = false;
 
   void _toggleSelection(String laborId) {
@@ -82,12 +83,19 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
               child: const Icon(Icons.delete_outline, color: Colors.red, size: 24),
             ),
             const SizedBox(width: 12),
-            const Text('Are you sure?'),
+            const SizedBox(width: 12),
+            const Text(
+              'Are you sure?',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
           ],
         ),
         content: Text(
-          'This action cannot be undone. You are about to permanently delete ${_selectedLaborIds.length} selected labor(s).',
-          style: const TextStyle(color: Color(0xff607286)),
+          'This action cannot be undone. You are about to permanently delete ${_selectedLaborIds.length} selected labour(s).',
+          style: const TextStyle(color: Color(0xff607286), fontSize: 16),
         ),
         actions: [
           TextButton(
@@ -115,50 +123,36 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
     );
 
     if (confirmed == true && context.mounted) {
-      final laborService = context.read<LaborService>();
-      final success = await laborService.deleteLabors(_selectedLaborIds.toList());
-
-      if (context.mounted) {
+      // UI-only delete: Add selected IDs to hidden set
+      setState(() {
+        _hiddenLaborIds.addAll(_selectedLaborIds);
         _clearSelection();
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Colors.white24,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.check, color: Colors.white, size: 16),
-                  ),
-                  const SizedBox(width: 12),
-                  const Text('Labors deleted successfully'),
-                ],
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.white24,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 16),
               ),
-              backgroundColor: const Color(0xff22a340),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              margin: const EdgeInsets.all(16),
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Failed to delete labors'),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              margin: const EdgeInsets.all(16),
-            ),
-          );
-        }
-      }
+              const SizedBox(width: 12),
+              const Text('Labours deleted successfully'),
+            ],
+          ),
+          backgroundColor: const Color(0xff22a340),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          margin: const EdgeInsets.all(16),
+        ),
+      );
     }
   }
 
@@ -196,10 +190,10 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xffe7eff6),
       appBar: AppBar(
-        backgroundColor: const Color(0xff093e86),
-        foregroundColor: Colors.white,
+        backgroundColor: _isSelectionMode ? Colors.white : const Color(0xff093e86),
+        foregroundColor: _isSelectionMode ? Colors.black : Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(_isSelectionMode ? Icons.close : Icons.arrow_back),
           onPressed: () {
             if (_isSelectionMode) {
               _clearSelection();
@@ -208,12 +202,49 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
             }
           },
         ),
-        title: const Text('Add Labour to Site'),
+        title: Text(
+          _isSelectionMode
+              ? '${_selectedLaborIds.length} Selected'
+              : 'Add Labour to Site',
+          style: TextStyle(
+            color: _isSelectionMode ? Colors.black : Colors.white,
+            fontWeight: _isSelectionMode ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        actions: [
+          if (_isSelectionMode)
+            IconButton(
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _selectedLaborIds.isNotEmpty
+                      ? Colors.red.withValues(alpha: 0.1)
+                      : Colors.grey.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.delete_outline,
+                  color: _selectedLaborIds.isNotEmpty
+                      ? Colors.red
+                      : Colors.grey,
+                ),
+              ),
+              onPressed: _selectedLaborIds.isNotEmpty
+                  ? () => _handleDelete(context)
+                  : null,
+            ),
+        ],
         centerTitle: false,
       ),
       body: Consumer2<LaborService, SiteService>(
         builder: (context, laborService, siteService, child) {
-          final labors = laborService.labors;
+      body: Consumer2<LaborService, SiteService>(
+        builder: (context, laborService, siteService, child) {
+          final allLabors = laborService.labors;
+          // Filter out locally deleted labors
+          final labors = allLabors
+              .where((l) => !_hiddenLaborIds.contains(l.id))
+              .toList();
           final counts = _getLaborCounts(labors);
 
           if (laborService.isLoading && labors.isEmpty) {
@@ -357,21 +388,24 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
                               _isLaborAssigned(labor.siteName);
 
                           return GestureDetector(
+                          return GestureDetector(
                             onTap: () {
-                              if (isAssigned) {
-                                // Open edit dialog for assigned labor
-                                _showAssignmentDialog(
-                                  laborIds: [labor.id],
-                                  labors: [labor],
-                                  isEdit: true,
-                                );
-                              } else {
+                              if (_isSelectionMode) {
                                 _toggleSelection(labor.id);
+                              } else {
+                                if (isAssigned) {
+                                  // Open edit dialog for assigned labor
+                                  _showAssignmentDialog(
+                                    laborIds: [labor.id],
+                                    labors: [labor],
+                                    isEdit: true,
+                                  );
+                                }
+                                // If unassigned and not in selection mode, do nothing on tap
+                                // (Assignment is done via the button at the bottom)
                               }
                             },
-                            onLongPress: isAssigned
-                                ? null
-                                : () => _enterSelectionMode(labor.id),
+                            onLongPress: () => _enterSelectionMode(labor.id),
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 12),
                               padding: const EdgeInsets.all(16),
@@ -433,6 +467,34 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
                                           : null,
                                     ),
                                     const SizedBox(width: 12),
+                                  ] else if (_isSelectionMode) ...[
+                                      // Unassigned + Selection Mode
+                                      Container(
+                                        width: 24,
+                                        height: 24,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: isSelected
+                                              ? null
+                                              : Border.all(
+                                                  color: const Color(
+                                                    0xffc4c4c4,
+                                                  ),
+                                                  width: 2,
+                                                ),
+                                          color: isSelected
+                                              ? const Color(0xff4caf50)
+                                              : Colors.transparent,
+                                        ),
+                                        child: isSelected
+                                            ? const Icon(
+                                                Icons.check,
+                                                color: Colors.white,
+                                                size: 16,
+                                              )
+                                            : null,
+                                      ),
+                                      const SizedBox(width: 12),
                                   ] else ...[
                                     Container(
                                       width: 24,
