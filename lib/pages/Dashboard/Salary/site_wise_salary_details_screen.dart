@@ -119,309 +119,221 @@ class _SiteWiseSalaryDetailsScreenState
     return Scaffold(
       backgroundColor: const Color(0xfff5f7fa),
       appBar: AppBar(
-        backgroundColor: const Color(0xfff5f7fa),
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
           'Salary Details',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xff0a2342),
+        elevation: 0,
         centerTitle: true,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // Header Information Card
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                // Premium Header Card
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(24),
+                      bottomRight: Radius.circular(24),
                     ),
-                    child: Column(
-                      children: [
-                        Row(
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xff0a2342), Color(0xff003a78)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xff003a78).withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xffeaf1fb),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(Icons.apartment,
-                                  color: Color(0xff003a78)),
-                            ),
-                            const SizedBox(width: 16),
-                            Column(
+                            Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'PROJECT SITE',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.business,
+                                    color: Colors.white,
+                                    size: 24,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  widget.siteName,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'PROJECT SITE',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7),
+                                          fontSize: 11,
+                                          letterSpacing: 1,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        widget.siteName,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                              child: Divider(
+                                color: Colors.white24,
+                                height: 1,
+                              ),
+                            ),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.date_range,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'DURATION',
+                                        style: TextStyle(
+                                          color: Colors.white.withOpacity(0.7),
+                                          fontSize: 11,
+                                          letterSpacing: 1,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${dateFormat.format(widget.fromDate)} - ${dateFormat.format(widget.toDate)}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12.0),
-                          child: Divider(),
-                        ),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xffeaf1fb),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Icon(Icons.calendar_today,
-                                  color: Color(0xff003a78)),
-                            ),
-                            const SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'DURATION',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${dateFormat.format(widget.fromDate)} - ${dateFormat.format(widget.toDate)}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
 
-                // Table Header
-                Container(
-                  color: const Color(0xff003a78),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                // Table Header / List Title
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 10),
                   child: Row(
-                    children: const [
-                      SizedBox(
-                        width: 40,
-                        child: Text(
-                          'NO.',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
+                    children: [
+                      Text(
+                        'LABOUR LIST',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          letterSpacing: 0.5,
                         ),
                       ),
-                      Expanded(
-                        flex: 3,
-                        child: Text(
-                          'LABOUR NAME',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'RATE',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'ATTEN.',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          'TOTAL',
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
+                      const Spacer(),
+                      Text(
+                        '${_salaryData.length} Workers',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // List Data
+                // List Data - Cards
                 Expanded(
                   child: _salaryData.isEmpty
-                      ? const Center(child: Text('No Labors found for this site'))
-                      : ListView.separated(
-                          padding: EdgeInsets.zero,
-                          itemCount: _salaryData.length,
-                          separatorBuilder: (context, index) => const Divider(
-                            height: 1,
-                            color: Color(0xffecedee),
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.person_off_outlined,
+                                  size: 48, color: Colors.grey[400]),
+                              const SizedBox(height: 16),
+                              Text('No Labors found for this site',
+                                  style: TextStyle(color: Colors.grey[600])),
+                            ],
                           ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                          itemCount: _salaryData.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: 12),
                           itemBuilder: (context, index) {
                             final item = _salaryData[index];
-                            return Container(
-                              color: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 16),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    width: 40,
-                                    child: Text(
-                                      (index + 1).toString().padLeft(2, '0'),
-                                      style: const TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 3,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item['labourName'],
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        if (item['work'] != null)
-                                          Text(
-                                            item['work'],
-                                            style: const TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      '₹${item['rate'].toInt()}',
-                                      style: const TextStyle(
-                                        color: Color(0xff607286),
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: RichText(
-                                      text: TextSpan(
-                                        style: DefaultTextStyle.of(context).style,
-                                        children: [
-                                          TextSpan(
-                                            text: '${item['fullDays']} ',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                          const TextSpan(
-                                            text: 'F',
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                          if (item['halfDays'] > 0) ...[
-                                            const TextSpan(text: '\n'),
-                                            TextSpan(
-                                              text: '+${item['halfDays']} ',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                            const TextSpan(
-                                              text: 'H',
-                                              style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: Text(
-                                      '₹${NumberFormat('#,##0').format(item['totalSalary'])}',
-                                      textAlign: TextAlign.right,
-                                      style: const TextStyle(
-                                        color: Color(0xff003a78),
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
+                            return _buildLabourSalaryCard(context, index, item);
                           },
                         ),
                 ),
 
                 // Footer Total
                 Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, -4),
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, -5),
                       ),
                     ],
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                    ),
                   ),
                   child: SafeArea(
                     top: false,
@@ -430,21 +342,23 @@ class _SiteWiseSalaryDetailsScreenState
                       children: [
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
                             Text(
-                              'TOTAL PAYABLE SALARY',
+                              'TOTAL PAYABLE',
                               style: TextStyle(
-                                color: Color(0xff607286),
+                                color: Colors.grey[600],
                                 fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                                fontSize: 12,
+                                letterSpacing: 0.5,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
                               'For selected duration',
                               style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
+                                color: Colors.grey[400],
+                                fontSize: 11,
                               ),
                             ),
                           ],
@@ -454,7 +368,7 @@ class _SiteWiseSalaryDetailsScreenState
                           style: const TextStyle(
                             color: Color(0xff003a78),
                             fontWeight: FontWeight.bold,
-                            fontSize: 24,
+                            fontSize: 26,
                           ),
                         ),
                       ],
@@ -463,6 +377,158 @@ class _SiteWiseSalaryDetailsScreenState
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _buildLabourSalaryCard(
+      BuildContext context, int index, Map<String, dynamic> item) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xffeaf1fb),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  (index + 1).toString().padLeft(2, '0'),
+                  style: const TextStyle(
+                    color: Color(0xff003a78),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item['labourName'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Color(0xff0a2342),
+                      ),
+                    ),
+                    Text(
+                      item['work'] ?? 'Worker',
+                      style: TextStyle(
+                        color: Colors.grey[500],
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '₹${NumberFormat('#,##0').format(item['totalSalary'])}',
+                    style: const TextStyle(
+                      color: Color(0xff003a78),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffe8f5e9),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '@ ₹${item['rate'].toInt()}/day',
+                      style: const TextStyle(
+                        color: Color(0xff2e7d32),
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xfff5f7fa),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildAttendanceStat(
+                  label: 'Full Days',
+                  value: '${item['fullDays']}',
+                  color: const Color(0xff1565c0),
+                ),
+                Container(width: 1, height: 24, color: Colors.grey[300]),
+                _buildAttendanceStat(
+                  label: 'Half Days',
+                  value: '${item['halfDays']}',
+                  color: const Color(0xffef6c00),
+                ),
+                Container(width: 1, height: 24, color: Colors.grey[300]),
+                _buildAttendanceStat(
+                  label: 'Total Days',
+                  value: '${item['fullDays'] + (item['halfDays'] * 0.5)}',
+                  color: const Color(0xff2e7d32),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAttendanceStat(
+      {required String label, required String value, required Color color}) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey[600],
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }
