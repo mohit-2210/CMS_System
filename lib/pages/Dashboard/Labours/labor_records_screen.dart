@@ -282,45 +282,50 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
                     ],
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       // Total
-                      GestureDetector(
-                        onTap: () => setState(() => _selectedFilter = 'Total'),
-                        child: Column(
-                          children: [
-                            Text(
-                              '${counts['total']}',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: _selectedFilter == 'Total'
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.6),
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => setState(() => _selectedFilter = 'Total'),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${counts['total']}',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: _selectedFilter == 'Total'
+                                      ? Colors.white
+                                      : Colors.white.withValues(alpha: 0.6),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'TOTAL',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: _selectedFilter == 'Total'
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.6),
-                                letterSpacing: 1,
-                                fontWeight: _selectedFilter == 'Total'
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                              const SizedBox(height: 4),
+                              Text(
+                                'TOTAL',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: _selectedFilter == 'Total'
+                                      ? Colors.white
+                                      : Colors.white.withValues(alpha: 0.6),
+                                  letterSpacing: 1,
+                                  fontWeight: _selectedFilter == 'Total'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
                               ),
-                            ),
-                            if (_selectedFilter == 'Total')
-                              Container(
-                                margin: const EdgeInsets.only(top: 4),
-                                height: 2,
-                                width: 20,
-                                color: Colors.white,
-                              ),
-                          ],
+                              if (_selectedFilter == 'Total')
+                                Container(
+                                  margin: const EdgeInsets.only(top: 4),
+                                  height: 2,
+                                  width: 20,
+                                  color: Colors.white,
+                                )
+                              else
+                                const SizedBox(height: 6), // Keep layout stable
+                            ],
+                          ),
                         ),
                       ),
                       Container(
@@ -329,42 +334,48 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
                         color: Colors.white30,
                       ),
                       // Assigned
-                      GestureDetector(
-                        onTap: () => setState(() => _selectedFilter = 'Assigned'),
-                        child: Column(
-                          children: [
-                            Text(
-                              '${counts['assigned']}',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: _selectedFilter == 'Assigned'
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.6),
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => setState(() => _selectedFilter = 'Assigned'),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${counts['assigned']}',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: _selectedFilter == 'Assigned'
+                                      ? Colors.white
+                                      : Colors.white.withValues(alpha: 0.6),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'ASSIGNED',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: _selectedFilter == 'Assigned'
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.6),
-                                letterSpacing: 1,
-                                fontWeight: _selectedFilter == 'Assigned'
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                              const SizedBox(height: 4),
+                              Text(
+                                'ASSIGNED',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: _selectedFilter == 'Assigned'
+                                      ? Colors.white
+                                      : Colors.white.withValues(alpha: 0.6),
+                                  letterSpacing: 1,
+                                  fontWeight: _selectedFilter == 'Assigned'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
                               ),
-                            ),
-                            if (_selectedFilter == 'Assigned')
-                              Container(
-                                margin: const EdgeInsets.only(top: 4),
-                                height: 2,
-                                width: 20,
-                                color: Colors.white,
-                              ),
-                          ],
+                              if (_selectedFilter == 'Assigned')
+                                Container(
+                                  margin: const EdgeInsets.only(top: 4),
+                                  height: 2,
+                                  width: 20,
+                                  color: Colors.white,
+                                )
+                              else
+                                const SizedBox(height: 6),
+                            ],
+                          ),
                         ),
                       ),
                       Container(
@@ -373,43 +384,49 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
                         color: Colors.white30,
                       ),
                       // Unassigned
-                      GestureDetector(
-                        onTap: () =>
-                            setState(() => _selectedFilter = 'Unassigned'),
-                        child: Column(
-                          children: [
-                            Text(
-                              '${counts['unassigned']}',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: _selectedFilter == 'Unassigned'
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.6),
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () =>
+                              setState(() => _selectedFilter = 'Unassigned'),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${counts['unassigned']}',
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: _selectedFilter == 'Unassigned'
+                                      ? Colors.white
+                                      : Colors.white.withValues(alpha: 0.6),
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'UNASSIGNED',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: _selectedFilter == 'Unassigned'
-                                    ? Colors.white
-                                    : Colors.white.withOpacity(0.6),
-                                letterSpacing: 1,
-                                fontWeight: _selectedFilter == 'Unassigned'
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                              const SizedBox(height: 4),
+                              Text(
+                                'UNASSIGNED',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: _selectedFilter == 'Unassigned'
+                                      ? Colors.white
+                                      : Colors.white.withValues(alpha: 0.6),
+                                  letterSpacing: 1,
+                                  fontWeight: _selectedFilter == 'Unassigned'
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
                               ),
-                            ),
-                            if (_selectedFilter == 'Unassigned')
-                              Container(
-                                margin: const EdgeInsets.only(top: 4),
-                                height: 2,
-                                width: 20,
-                                color: Colors.white,
-                              ),
-                          ],
+                              if (_selectedFilter == 'Unassigned')
+                                Container(
+                                  margin: const EdgeInsets.only(top: 4),
+                                  height: 2,
+                                  width: 20,
+                                  color: Colors.white,
+                                )
+                              else
+                                const SizedBox(height: 6),
+                            ],
+                          ),
                         ),
                       ),
                     ],

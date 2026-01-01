@@ -141,21 +141,55 @@ class _SiteRecordsScreenState extends State<SiteRecordsScreen> {
     }
   }
 
-  ({Color color, IconData icon}) _getSiteStyle(String siteName) {
-    // Normalize string for checking
+  // List of vibrant colors for dynamic assignment
+  final List<Color> _siteColors = [
+    const Color(0xff2979ff), // Blue
+    const Color(0xff7b1fa2), // Purple
+    const Color(0xffff9100), // Orange
+    const Color(0xff00c853), // Green
+    const Color(0xffd50000), // Red
+    const Color(0xff00bfa5), // Teal
+    const Color(0xffc51162), // Pink
+    const Color(0xff304ffe), // Indigo
+    const Color(0xff00b8d4), // Cyan
+    const Color(0xffff6d00), // Deep Orange
+  ];
+
+  Color _getSiteColor(String siteName, String siteId) {
+    // Determine color based on the site ID hash to ensure it's consistent for the same site
+    // but likely different for new sites ("new color").
+    // We mix ID and Name hash to get good distribution.
+    final hash = siteId.hashCode ^ siteName.hashCode;
+    final index = hash.abs() % _siteColors.length;
+    return _siteColors[index];
+  }
+
+  IconData _getSiteIcon(String siteName) {
     final name = siteName.toLowerCase();
     
-    if (name.contains('mall') || name.contains('store') || name.contains('shop')) {
-      return (color: const Color(0xff2979ff), icon: Icons.store); // Blue
-    } else if (name.contains('complex') || name.contains('apartment') || name.contains('tower') || name.contains('building')) {
-      return (color: const Color(0xff7b1fa2), icon: Icons.apartment); // Purple
-    } else if (name.contains('farm') || name.contains('house') || name.contains('villa')) {
-      return (color: const Color(0xffff9100), icon: Icons.grid_view_rounded); // Orange (using grid view as generic structure/farm plot look)
-    } else if (name.contains('railway') || name.contains('train') || name.contains('station')) {
-      return (color: const Color(0xff00c853), icon: Icons.train); // Green
+    if (name.contains('mall') || name.contains('store') || name.contains('shop') || name.contains('market')) {
+      return Icons.store_mall_directory_rounded;
+    } else if (name.contains('complex') || name.contains('apartment') || name.contains('tower') || name.contains('building') || name.contains('flat') || name.contains('residency')) {
+      return Icons.apartment_rounded;
+    } else if (name.contains('farm') || name.contains('house') || name.contains('villa') || name.contains('bungalow') || name.contains('cottage') || name.contains('home')) {
+      return Icons.holiday_village_rounded;
+    } else if (name.contains('railway') || name.contains('train') || name.contains('station') || name.contains('metro')) {
+      return Icons.train_rounded;
+    } else if (name.contains('hospital') || name.contains('clinic') || name.contains('medical')) {
+      return Icons.local_hospital_rounded;
+    } else if (name.contains('school') || name.contains('college') || name.contains('university')) {
+      return Icons.school_rounded;
+    } else if (name.contains('road') || name.contains('bridge') || name.contains('highway')) {
+      return Icons.add_road_rounded;
+    } else if (name.contains('hotel') || name.contains('restaurant') || name.contains('cafe')) {
+      return Icons.restaurant_rounded;
+    } else if (name.contains('park') || name.contains('garden')) {
+      return Icons.park_rounded;
+    } else if (name.contains('factory') || name.contains('industry') || name.contains('plant')) {
+      return Icons.factory_rounded;
     } else {
-      // Default
-      return (color: const Color(0xff2979ff), icon: Icons.business);
+      // Default generic icon
+      return Icons.business_rounded;
     }
   }
 
@@ -239,7 +273,8 @@ class _SiteRecordsScreenState extends State<SiteRecordsScreen> {
             itemBuilder: (context, index) {
               final site = sites[index];
               final isSelected = _selectedSiteIds.contains(site.id);
-              final style = _getSiteStyle(site.siteName);
+              final color = _getSiteColor(site.siteName, site.id);
+              final icon = _getSiteIcon(site.siteName);
 
               return GestureDetector(
                 onTap: _isSelectionMode
@@ -269,7 +304,7 @@ class _SiteRecordsScreenState extends State<SiteRecordsScreen> {
                         // Left Colored Bar
                         Container(
                           width: 6,
-                          color: isSelected ? const Color(0xff003a78) : style.color,
+                          color: isSelected ? const Color(0xff003a78) : color,
                         ),
                         
                         Expanded(
@@ -282,12 +317,12 @@ class _SiteRecordsScreenState extends State<SiteRecordsScreen> {
                                   width: 48,
                                   height: 48,
                                   decoration: BoxDecoration(
-                                    color: style.color.withValues(alpha: 0.1),
+                                    color: color.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Icon(
-                                    style.icon,
-                                    color: style.color,
+                                    icon,
+                                    color: color,
                                     size: 24,
                                   ),
                                 ),
