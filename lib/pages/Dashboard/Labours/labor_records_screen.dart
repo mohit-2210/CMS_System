@@ -306,6 +306,10 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final laborService = Provider.of<LaborService>(context);
+    final hasAssignedSelected = laborService.labors.any((l) =>
+        _selectedLaborIds.contains(l.id) && _isLaborAssigned(l.siteName));
+
     return Scaffold(
       backgroundColor: const Color(0xffe7eff6),
       appBar: AppBar(
@@ -332,22 +336,23 @@ class _LaborRecordsScreenState extends State<LaborRecordsScreen> {
         ),
         actions: [
           if (_isSelectionMode) ...[
-             IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
+             if (hasAssignedSelected)
+               IconButton(
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.person_remove_outlined,
+                    color: Colors.white,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.person_remove_outlined,
-                  color: Colors.white,
-                ),
+                onPressed: _selectedLaborIds.isNotEmpty
+                    ? () => _handleUnassign(context)
+                    : null,
               ),
-              onPressed: _selectedLaborIds.isNotEmpty
-                  ? () => _handleUnassign(context)
-                  : null,
-            ),
             IconButton(
               icon: Container(
                 padding: const EdgeInsets.all(8),
