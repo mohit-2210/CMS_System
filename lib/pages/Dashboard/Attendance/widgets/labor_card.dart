@@ -57,7 +57,6 @@ class _LaborCardState extends State<LaborCard> {
     });
 
     final existing = await _attendanceService.getAttendanceRecord(
-      siteName: widget.siteName,
       laborId: widget.laborId,
       date: widget.selectedDate,
     );

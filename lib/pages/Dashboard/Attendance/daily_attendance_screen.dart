@@ -192,9 +192,9 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
                 : null;
 
         await _attendanceService.createOrUpdateAttendance(
-          siteName: siteName,
           laborId: laborId,
           laborName: laborName,
+          // Site info is now fetched from assignments in the service
           date: _selectedDate,
           dayShift: dayShift,
           nightShift: nightShift,

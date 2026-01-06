@@ -40,11 +40,19 @@ class _AssignLaborToSiteScreenState extends State<AssignLaborToSiteScreen> {
 
     try {
       final laborService = context.read<LaborService>();
+      final siteService = context.read<SiteService>();
+
+      // Find the selected site object to get the ID
+      final selectedSite = siteService.sites.firstWhere(
+        (s) => s.siteName == _selectedSiteName,
+        orElse: () => throw Exception('Selected site not found'),
+      );
 
       // Update each selected labor with the new site
       for (final labor in widget.labors) {
         await laborService.assignLaborToSite(
           laborId: labor.id,
+          siteId: selectedSite.id,
           siteName: _selectedSiteName!,
         );
       }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cms/models/labor_model.dart';
 import 'package:cms/models/attendance_model.dart';
-import 'package:cms/models/pay_period_model.dart';
 import 'package:provider/provider.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:intl/intl.dart';
@@ -74,15 +73,46 @@ class LaborService extends ChangeNotifier {
   /// Assign a labor to a site
   Future<bool> assignLaborToSite({
     required String laborId,
+    required String siteId,
     required String siteName,
   }) async {
     try {
       _isLoading = true;
       notifyListeners();
 
-      await _firestore.collection('labors').doc(laborId).update({
+      // 1. Deactivate current active assignment if any
+      final activeQuery = await _firestore
+          .collection('assignments')
+          .where('laborId', isEqualTo: laborId)
+          .where('status', isEqualTo: 'active')
+          .get();
+
+      final batch = _firestore.batch();
+
+      for (var doc in activeQuery.docs) {
+        batch.update(doc.reference, {
+          'status': 'inactive',
+          'endDate': FieldValue.serverTimestamp(),
+        });
+      }
+
+      // 2. Create new assignment
+      final newAssignmentRef = _firestore.collection('assignments').doc();
+      batch.set(newAssignmentRef, {
+        'laborId': laborId,
+        'siteId': siteId,
+        'siteName': siteName,
+        'status': 'active',
+        'createdAt': FieldValue.serverTimestamp(),
+        'startDate': FieldValue.serverTimestamp(),
+      });
+
+      // 3. Update labor document (Legacy support + UI display)
+      batch.update(_firestore.collection('labors').doc(laborId), {
         'siteName': siteName,
       });
+
+      await batch.commit();
 
       _isLoading = false;
       notifyListeners();
@@ -103,6 +133,10 @@ class LaborService extends ChangeNotifier {
       final batch = _firestore.batch();
       for (final id in laborIds) {
         batch.delete(_firestore.collection('labors').doc(id));
+        // Also deactivate assignments? Or delete them? 
+        // User didn't specify, but keeping them for history is safer.
+        // We might want to set them to inactive.
+        // For now, leaving assignments as is, or we could fetch and deactivate.
       }
       await batch.commit();
 
@@ -124,11 +158,28 @@ class LaborService extends ChangeNotifier {
       notifyListeners();
 
       final batch = _firestore.batch();
+      
       for (final id in laborIds) {
+        // Update labor doc
         batch.update(_firestore.collection('labors').doc(id), {
           'siteName': 'Unassigned',
         });
+
+        // Deactivate active assignments
+        final activeQuery = await _firestore
+            .collection('assignments')
+            .where('laborId', isEqualTo: id)
+            .where('status', isEqualTo: 'active')
+            .get();
+        
+        for (var doc in activeQuery.docs) {
+          batch.update(doc.reference, {
+            'status': 'inactive',
+            'endDate': FieldValue.serverTimestamp(),
+          });
+        }
       }
+      
       await batch.commit();
 
       _isLoading = false;
@@ -267,98 +318,6 @@ class LaborService extends ChangeNotifier {
     } catch (e) {
       debugPrint('Error recording withdrawal: $e');
       return false;
-    }
-  }
-
-  /// Calculate and store pay period
-  Future<bool> calculatePayPeriod({
-    required String laborId,
-    required DateTime startDate,
-    required DateTime endDate,
-    required double dailySalary,
-  }) async {
-    try {
-      // Get all attendance records for the period
-      final attendanceList = await getAttendanceForPeriod(
-        laborId: laborId,
-        startDate: startDate,
-        endDate: endDate,
-      );
-
-      // Calculate totals
-      int totalDayShiftFull = 0;
-      int totalDayShiftHalf = 0;
-      int totalNightShiftFull = 0;
-      int totalNightShiftHalf = 0;
-      double totalWithdrawals = 0.0;
-
-      for (final attendance in attendanceList) {
-        if (attendance.dayShift == 'Full') totalDayShiftFull++;
-        if (attendance.dayShift == 'Half') totalDayShiftHalf++;
-        if (attendance.nightShift == 'Full') totalNightShiftFull++;
-        if (attendance.nightShift == 'Half') totalNightShiftHalf++;
-        totalWithdrawals += attendance.withdrawAmount;
-      }
-
-      // Calculate earnings (you can adjust the formula as needed)
-      final totalEarned = (totalDayShiftFull * dailySalary) +
-          (totalDayShiftHalf * dailySalary * 0.5) +
-          (totalNightShiftFull * dailySalary) +
-          (totalNightShiftHalf * dailySalary * 0.5);
-
-      final netPay = totalEarned - totalWithdrawals;
-
-      // Create pay period ID
-      final startStr = DateFormat('yyyy-MM-dd').format(startDate);
-      final endStr = DateFormat('yyyy-MM-dd').format(endDate);
-      final periodId = '${startStr}__$endStr';
-
-      final payPeriod = PayPeriodModel(
-        id: periodId,
-        startDate: startDate,
-        endDate: endDate,
-        totalDayShiftFull: totalDayShiftFull,
-        totalDayShiftHalf: totalDayShiftHalf,
-        totalNightShiftFull: totalNightShiftFull,
-        totalNightShiftHalf: totalNightShiftHalf,
-        totalWithdrawals: totalWithdrawals,
-        totalEarned: totalEarned,
-        netPay: netPay,
-        createdAt: DateTime.now(),
-      );
-
-      await _firestore
-          .collection('labors')
-          .doc(laborId)
-          .collection('payPeriods')
-          .doc(periodId)
-          .set(payPeriod.toJson());
-
-      return true;
-    } catch (e) {
-      debugPrint('Error calculating pay period: $e');
-      return false;
-    }
-  }
-
-  /// Get pay periods for a labor
-  Future<List<PayPeriodModel>> getPayPeriods({
-    required String laborId,
-  }) async {
-    try {
-      final snapshot = await _firestore
-          .collection('labors')
-          .doc(laborId)
-          .collection('payPeriods')
-          .orderBy('startDate', descending: true)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => PayPeriodModel.fromJson(doc.data()))
-          .toList();
-    } catch (e) {
-      debugPrint('Error getting pay periods: $e');
-      return [];
     }
   }
 }

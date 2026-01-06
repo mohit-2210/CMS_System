@@ -7,16 +7,23 @@ class AttendanceService {
 
   /// Fetch existing attendance record for a specific labor on a specific date
   Future<Map<String, dynamic>?> getAttendanceRecord({
-    required String siteName,
     required String laborId,
     required DateTime date,
   }) async {
     try {
       final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
       
+      // Try fetching by strict ID first (New Flow)
+      final docId = '${dateStr}_$laborId';
+      final docSnapshot = await _firestore.collection('attendance').doc(docId).get();
+      
+      if (docSnapshot.exists) {
+        return docSnapshot.data();
+      }
+
+      // Fallback: Query by fields (Old Flow or if ID format was different)
       final query = await _firestore
-          .collection('attendances')
-          .where('siteName', isEqualTo: siteName)
+          .collection('attendance')
           .where('laborId', isEqualTo: laborId)
           .where('dateStr', isEqualTo: dateStr)
           .limit(1)
@@ -62,7 +69,6 @@ class AttendanceService {
 
   /// Create or update attendance with cumulative withdrawal logic
   Future<bool> createOrUpdateAttendance({
-    required String siteName,
     required String laborId,
     required String laborName,
     required DateTime date,
@@ -71,34 +77,54 @@ class AttendanceService {
     required int? newWithdrawAmount,
     required String paymentMode,
     required String? adminName,
+    String? siteName, // Optional/Ignored as per new flow
   }) async {
     try {
-      // Check if record exists
-      final existingRecord = await getAttendanceRecord(
-        siteName: siteName,
-        laborId: laborId,
-        date: date,
-      );
+      // 1. Check Assignments
+      final assignmentQuery = await _firestore
+          .collection('assignments')
+          .where('laborId', isEqualTo: laborId)
+          .where('status', isEqualTo: 'active')
+          .get();
 
-      // Calculate cumulative withdrawal amount
-      int totalWithdrawAmount = 0;
-      if (newWithdrawAmount != null && newWithdrawAmount > 0) {
-        if (existingRecord != null) {
-          // Update: add to existing amount
-          totalWithdrawAmount = (existingRecord['withdrawAmount'] ?? 0) + newWithdrawAmount;
-        } else {
-          // New record
-          totalWithdrawAmount = newWithdrawAmount;
-        }
+      if (assignmentQuery.docs.isEmpty) {
+        throw Exception("Labour is not assigned to any site");
       }
 
+      final assignment = assignmentQuery.docs.first.data();
+      final assignedSiteId = assignment['siteId'] as String?;
+      final assignedSiteName = assignment['siteName'] as String?;
+
+      if (assignedSiteName == null || assignedSiteName.isEmpty) {
+         throw Exception("Invalid assignment: missing site information");
+      }
+
+      // 2. Prepare Doc ID and Data
       final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-      final attendanceData = {
-        'siteName': siteName,
+      final docId = '${dateStr}_$laborId';
+      
+      final attendanceRef = _firestore.collection('attendance').doc(docId);
+      final existingDoc = await attendanceRef.get();
+
+      // Calculate cumulative withdrawal
+      int totalWithdrawAmount = 0;
+      if (newWithdrawAmount != null && newWithdrawAmount > 0) {
+        if (existingDoc.exists) {
+          final data = existingDoc.data();
+          totalWithdrawAmount = (data?['withdrawAmount'] ?? 0) + newWithdrawAmount;
+        } else {
+          totalWithdrawAmount = newWithdrawAmount;
+        }
+      } else if (existingDoc.exists) {
+         // Keep existing amount if no new withdrawal
+         totalWithdrawAmount = existingDoc.data()?['withdrawAmount'] ?? 0;
+      }
+
+      final Map<String, dynamic> attendanceData = {
         'laborId': laborId,
-        'laborName': laborName,
+        'laborName': laborName.isEmpty ? assignment['siteName'] : laborName, // Fallback if needed, though laborName is passed
         'date': Timestamp.fromDate(date),
-        'dateStr': dateStr, // For easier querying
+        'dateStr': dateStr,
         'dayShift': dayShift,
         'nightShift': nightShift,
         'withdrawAmount': totalWithdrawAmount,
@@ -107,30 +133,22 @@ class AttendanceService {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      if (existingRecord != null) {
-        // Update existing record
-        final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-        final query = await _firestore
-            .collection('attendances')
-            .where('siteName', isEqualTo: siteName)
-            .where('laborId', isEqualTo: laborId)
-            .where('dateStr', isEqualTo: dateStr)
-            .limit(1)
-            .get();
-
-        if (query.docs.isNotEmpty) {
-          await query.docs.first.reference.update(attendanceData);
-        }
-      } else {
-        // Create new record
+      if (!existingDoc.exists) {
+        // New Record - Set immutable site info from assignment
+        attendanceData['siteId'] = assignedSiteId;
+        attendanceData['siteName'] = assignedSiteName;
         attendanceData['createdAt'] = FieldValue.serverTimestamp();
-        await _firestore.collection('attendances').add(attendanceData);
+        
+        await attendanceRef.set(attendanceData);
+      } else {
+        // Update - Do NOT change site info
+        await attendanceRef.update(attendanceData);
       }
 
       return true;
     } catch (e) {
       print('Error creating/updating attendance: $e');
-      return false;
+      rethrow; // Rethrow to handle in UI
     }
   }
 
