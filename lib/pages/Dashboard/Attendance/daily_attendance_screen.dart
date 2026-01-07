@@ -23,13 +23,39 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
   DateTime _displayMonth = DateTime.now(); // Track current month being displayed
   final ScrollController _calendarScrollController = ScrollController();
   final AttendanceService _attendanceService = AttendanceService();
+  
+  // Cache for daily attendance to support strict filtering
+  Map<String, Map<String, dynamic>> _dailyAttendanceCache = {};
+  bool _isLoadingAttendance = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedDate();
+      _fetchDailyAttendance();
     });
+  }
+
+  Future<void> _fetchDailyAttendance() async {
+    if (!mounted) return;
+    setState(() => _isLoadingAttendance = true);
+    
+    final records = await _attendanceService.getAllAttendanceForDate(_selectedDate);
+    
+    final newMap = <String, Map<String, dynamic>>{};
+    for (var record in records) {
+      if (record['laborId'] != null) {
+        newMap[record['laborId']] = record;
+      }
+    }
+    
+    if (mounted) {
+      setState(() {
+        _dailyAttendanceCache = newMap;
+        _isLoadingAttendance = false;
+      });
+    }
   }
 
   void _scrollToSelectedDate() {
@@ -98,6 +124,7 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
     // Ensure the date is scrolled into view
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedDate();
+      _fetchDailyAttendance();
     });
   }
 
@@ -206,11 +233,11 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
           siteId: siteId,
         );
 
-        _showSuccessSnackBar(
-          newWithdrawAmount != null && newWithdrawAmount > 0
-              ? 'Attendance and payment recorded'
               : 'Attendance recorded successfully',
         );
+        
+        // Refresh local cache to reflect changes immediately
+        await _fetchDailyAttendance();
       } catch (e) {
         _showErrorSnackBar('Failed to save attendance: $e');
       }
@@ -339,12 +366,21 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
           Expanded(
             child: Consumer<LaborService>(
               builder: (context, laborService, child) {
-                // Filter labors based on selected site
-                final labors = _selectedSite != null && _selectedSite != 'All Sites'
-                    ? laborService.labors
-                        .where((labor) => labor.siteName == _selectedSite)
-                        .toList()
-                    : laborService.labors;
+                // Filter labors based on selected site AND attendance records
+                final labors = laborService.labors.where((labor) {
+                   // 1. Determine effective site
+                   final attendance = _dailyAttendanceCache[labor.id];
+                   final effectiveSite = attendance != null 
+                      ? (attendance['siteName'] as String?) 
+                      : labor.siteName;
+                   
+                   // 2. Filter
+                   if (_selectedSite == null || _selectedSite == 'All Sites') return true;
+                   
+                   // Strict comparison: if attendance exists, MUST match its siteName
+                   // If no attendance, match current assignment
+                   return effectiveSite == _selectedSite;
+                }).toList();
 
                 if (labors.isEmpty) {
                   return Center(

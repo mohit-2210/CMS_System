@@ -33,9 +33,23 @@ class AttendanceService {
         return query.docs.first.data();
       }
       return null;
+    }
+  }
+
+  /// Fetch all attendance records for a specific date (for filtering)
+  Future<List<Map<String, dynamic>>> getAllAttendanceForDate(DateTime date) async {
+    try {
+      final dateStr = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+      
+      final query = await _firestore
+          .collection('attendance')
+          .where('dateStr', isEqualTo: dateStr)
+          .get();
+
+      return query.docs.map((doc) => doc.data()).toList();
     } catch (e) {
-      print('Error fetching attendance record: $e');
-      return null;
+      print('Error fetching daily attendance: $e');
+      return [];
     }
   }
 

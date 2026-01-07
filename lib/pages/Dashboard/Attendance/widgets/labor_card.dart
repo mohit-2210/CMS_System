@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:cms/globals/site_service.dart';
 import 'package:cms/components/animated_dropdown.dart';
 import 'package:cms/pages/Dashboard/Attendance/service/attendance_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'expanded_labor_form.dart';
 
 class LaborCard extends StatefulWidget {
@@ -74,8 +75,26 @@ class _LaborCardState extends State<LaborCard> {
           _dayShift = existing['dayShift'] ?? 'Half Day';
           _nightShift = existing['nightShift'] ?? 'None';
           _selectedAdminName = existing['adminName'];
+        } else {
+          // Load sticky defaults if no existing record
+          _loadStickyDefaults();
         }
       });
+    }
+  }
+
+  Future<void> _loadStickyDefaults() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      
+      setState(() {
+        _paymentMode = prefs.getString('last_payment_mode') ?? 'GPay/UPI';
+        _dayShift = prefs.getString('last_day_shift') ?? 'Half Day';
+        _nightShift = prefs.getString('last_night_shift') ?? 'None';
+      });
+    } catch (e) {
+      debugPrint('Error loading sticky defaults: $e');
     }
   }
 
@@ -261,6 +280,16 @@ class _LaborCardState extends State<LaborCard> {
     try {
       // Await the save operation
       await widget.onSave(data);
+
+      // Save sticky defaults
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('last_payment_mode', _paymentMode);
+        await prefs.setString('last_day_shift', _dayShift);
+        await prefs.setString('last_night_shift', _nightShift);
+      } catch (e) {
+        debugPrint('Error saving sticky defaults: $e');
+      }
 
       // Only update UI to success state AFTER successful save
       if (mounted) {
