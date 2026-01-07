@@ -232,9 +232,6 @@ class _DailyAttendanceScreenState extends State<DailyAttendanceScreen> {
           siteName: siteName, 
           siteId: siteId,
         );
-
-              : 'Attendance recorded successfully',
-        );
         
         // Refresh local cache to reflect changes immediately
         await _fetchDailyAttendance();

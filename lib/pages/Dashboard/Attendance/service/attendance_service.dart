@@ -33,6 +33,9 @@ class AttendanceService {
         return query.docs.first.data();
       }
       return null;
+    } catch (e) {
+      print('Error fetching attendance record: $e');
+      return null;
     }
   }
 
